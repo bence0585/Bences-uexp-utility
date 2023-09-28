@@ -17,7 +17,7 @@
 ![Usage](https://i.imgur.com/1uUAvcA.gif)
 
  1. Extract the asset you want to change using [Fmodel](https://moolah.dev/docs/modding-basics/using-fmodel/)
- 2. Have ffmpeg and wwise_pd3 installed, or next to the exe
+ 2. Have [ffmpeg](https://ffmpeg.org/download.html)and [wwise_pd3](https://github.com/MoolahModding/wwise_pd3) installed, or next to the exe
  3. Rename the music file to the id of the extracted files
  4. Drag the music file on top of the tool
  5. Enjoy!
