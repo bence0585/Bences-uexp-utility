@@ -27,4 +27,13 @@
  *Example:*
 
     but.exe 324756076.mp3
+  
+
+# Build it yourself
+The code doesn't need to be build necessarily, you can always use the tool from cli, but if you want the drag and drop experience, you need to package it into an exe.
+I built the code with pyinstaller, but you can always use another python packager.
+Instructions for pyinstaller:
+
+    pip install pyinstaller
+    pyinstaller --onefile but.py
 
