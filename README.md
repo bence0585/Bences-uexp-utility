@@ -3,10 +3,9 @@
 
 ![BUU](https://i.imgur.com/vOH2W6I.png)
 
-##Now remade in c#!
 
 ## Features
-
+- Now remade in c#!
 - Convert .mp3 or .wav to the correct format
 - Automatically modifies Uexp
 - If [wwise_pd3](https://github.com/MoolahModding/wwise_pd3) is present, it encodes the Wav into an Ubulk file
