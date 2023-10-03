@@ -1,10 +1,9 @@
-# The program will be remade shortly in a compiled language, as programs compiled by pyinstaller get falsely flagged by antivirus programs!
 # Bence's Uexp Utility
 
 
 ![BUU](https://i.imgur.com/vOH2W6I.png)
 
-
+##Now remade in c#!
 
 ## Features
 
@@ -14,7 +13,7 @@
 - Works with drag and drop
 ## Usage
 
-![Usage](https://i.imgur.com/1uUAvcA.gif)
+![Usage](https://i.imgur.com/2ymlHmV.gif)
 
  1. Extract the asset you want to change using [Fmodel](https://moolah.dev/docs/modding-basics/using-fmodel/)
  2. Have [ffmpeg](https://ffmpeg.org/download.html)and [wwise_pd3](https://github.com/MoolahModding/wwise_pd3) installed, or next to the exe
@@ -26,14 +25,7 @@
  
  *Example:*
 
-    but.exe 324756076.mp3
+    BencesUexpUtility.exe 324756076.mp3
   
 
-# Build it yourself
-The code doesn't need to be build necessarily, you can always use the tool from cli, but if you want the drag and drop experience, you need to package it into an exe.
-I built the code with pyinstaller, but you can always use another python packager.
-Instructions for pyinstaller:
-
-    pip install pyinstaller
-    pyinstaller --onefile but.py
 
