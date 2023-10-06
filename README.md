@@ -1,3 +1,4 @@
+
 # Bence's Uexp Utility
 
 
@@ -6,9 +7,10 @@
 
 ## Features
 - Now remade in c#!
-- Convert .mp3 or .wav to the correct format
+- Convert audio to the correct format
+- Accepts all codecs and extensions that ffmpeg can handle (".mp3", ".wav", ".flac", ".ogg", ".webm")
 - Automatically modifies Uexp
-- If [wwise_pd3](https://github.com/MoolahModding/wwise_pd3) is present, it encodes the Wav into an Ubulk file
+- Automatically encodes the audio into an Ubulk file
 - Works with drag and drop
 ## Usage
 
