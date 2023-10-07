@@ -25,7 +25,7 @@ namespace BencesUexpUtility
                 Console.Read();
                 return;
             }
-            string[] acceptedExtensions = { ".mp3", ".wav", ".flac", ".ogg", ".webm", };
+            string[] acceptedExtensions = { ".mp3", ".wav", ".flac", ".ogg", ".webm" };
             if (!(acceptedExtensions.Contains(audioFileInfo.Extension)))
             {
                 Console.Read();
@@ -46,7 +46,9 @@ namespace BencesUexpUtility
             string inputFilePath = audioFilePath;
             string outputFilePath = Path.ChangeExtension(audioFilePath, "re.wav");
 
-            string ffmpegArgs = $"-hide_banner -loglevel error -y -i \"{inputFilePath}\" -c:a pcm_s16le \"{outputFilePath}\"";
+            string ffmpegArgs = $"-hide_banner -loglevel error -y -i \"{inputFilePath}\" -map_metadata -1 -fflags +bitexact -flags:a +bitexact -flags:v +bitexact -vn -c:a pcm_s16le \"{outputFilePath}\" ";
+
+
             try
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo
@@ -207,7 +209,7 @@ namespace BencesUexpUtility
             File.Move(uexpFilePath, directoryPath + new FileInfo(uexpFilePath).Name);
             File.Move(ubulkFilePath, directoryPath + new FileInfo(ubulkFilePath).Name);
             File.Move(uassetFilePath, directoryPath + new FileInfo(uassetFilePath).Name);
-
+            File.Delete(replacementFilePath);
             Console.Read();
         }
 
