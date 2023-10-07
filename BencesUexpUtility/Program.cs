@@ -7,6 +7,15 @@ namespace BencesUexpUtility
 {
     internal class Program
     {
+        static void moveFiles(string file, string dest)
+        {
+            string fileDest = dest + new FileInfo(file).Name;
+            if (File.Exists(fileDest))
+            {
+                File.Delete(fileDest);
+            }
+            File.Move(file, fileDest);
+        }
         static void Main(string[] args)
         {
 
@@ -125,7 +134,9 @@ namespace BencesUexpUtility
             }
             Console.WriteLine("wwise is installed.");
 
-            inputFilePath = outputFilePath; string replacementFilePath = Path.ChangeExtension(audioFilePath, ".ubulk"); string wwiseArgs = $"-encode  \"{inputFilePath}\"  \"{replacementFilePath}\"";
+            inputFilePath = outputFilePath;
+            string replacementFilePath = Path.ChangeExtension(audioFilePath, ".ubulk");
+            string wwiseArgs = $"-encode  \"{inputFilePath}\"  \"{replacementFilePath}\"";
 
             try
             {
@@ -206,10 +217,11 @@ namespace BencesUexpUtility
 
             Console.WriteLine(directoryPath + new FileInfo(uexpFilePath).Name);
 
-            File.Move(uexpFilePath, directoryPath + new FileInfo(uexpFilePath).Name);
-            File.Move(ubulkFilePath, directoryPath + new FileInfo(ubulkFilePath).Name);
-            File.Move(uassetFilePath, directoryPath + new FileInfo(uassetFilePath).Name);
-            File.Delete(replacementFilePath);
+            
+            moveFiles(uexpFilePath,directoryPath);
+            moveFiles(ubulkFilePath,directoryPath);
+            moveFiles(uassetFilePath,directoryPath);
+            File.Delete(outputFilePath);
             Console.Read();
         }
 
