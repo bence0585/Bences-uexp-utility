@@ -2,57 +2,20 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 
 namespace BencesUexpUtility
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static void runFFmpeg(string ffmpegFile, string input, string output)
         {
-
-            if (!(args.Length > 0))
-            {
-                Console.WriteLine("Drag and drop an MP3 file onto this executable to read its contents and open the related text file.");
-                Console.Read();
-                return;
-            }
-            string audioFilePath = args[0];
-            FileInfo audioFileInfo = new FileInfo(audioFilePath);
-
-            if (!(File.Exists(audioFilePath)))
-            {
-                Console.WriteLine($"Music file not found: {audioFilePath}");
-                Console.Read();
-                return;
-            }
-            string[] acceptedExtensions = { ".mp3", ".wav", ".flac", ".ogg", ".webm", };
-            if (!(acceptedExtensions.Contains(audioFileInfo.Extension)))
-            {
-                Console.Read();
-                return;
-            }
-
-            string ffmpegFileName = "ffmpeg.exe";
-            bool isFfmpegInstalled = File.Exists(ffmpegFileName);
-
-            if (!isFfmpegInstalled)
-            {
-                Console.WriteLine("FFmpeg is not installed. You need to put ffmpeg.exe besides the utility exe for it to work.");
-            }
-            Console.WriteLine("FFmpeg is installed.");
-
-            string ffmpegPath = @"ffmpeg.exe";
-
-            string inputFilePath = audioFilePath;
-            string outputFilePath = Path.ChangeExtension(audioFilePath, "re.wav");
-
-            string ffmpegArgs = $"-hide_banner -loglevel error -y -i \"{inputFilePath}\" -c:a pcm_s16le \"{outputFilePath}\"";
             try
             {
                 ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    FileName = ffmpegPath,
-                    Arguments = ffmpegArgs,
+                    FileName = ffmpegFile,
+                    Arguments = $"-hide_banner -loglevel error -y -i \"{input}\" -map_metadata -1 -fflags +bitexact -flags:a +bitexact -flags:v +bitexact -vn -c:a pcm_s16le \"{output}\" ",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -75,11 +38,83 @@ namespace BencesUexpUtility
                 Console.Read();
                 return;
             }
+        }
+        static void runWwise(string wwiseFile, string input, string output)
+        {
 
+            try
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo
+                {
+                    FileName = wwiseFile,
+                    Arguments = $"-encode  \"{input}\"  \"{output}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = false
+                };
+
+                Process wwiseProcess = new Process
+                {
+                    StartInfo = startInfo
+                };
+                wwiseProcess.Start();
+
+                wwiseProcess.WaitForExit();
+
+                Console.WriteLine("Wwise encode process completed successfully.");
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error running wwise.exe: {ex.Message}");
+            }
+        }
+        static void createFolder(string name)
+        {
+            if (!Directory.Exists(name))
+            {
+                Directory.CreateDirectory(name);
+            }
+        }
+        static void moveFiles(string file, string dest)
+        {
+            string fileDest = dest + new FileInfo(file).Name;
+            if (File.Exists(fileDest))
+            {
+                File.Delete(fileDest);
+            }
+            File.Move(file, fileDest);
+        }
+        static void Main(string[] args)
+        {
+            //Check for an audio file
+            string audioFilePath = args[0];
+            if (!(args.Length > 0))
+            {
+                Console.WriteLine("Drag and drop an MP3 file onto this executable to read its contents and open the related text file.");
+                Console.Read();
+                return;
+            }
+            if (!(File.Exists(audioFilePath)))
+            {
+                Console.WriteLine($"Music file not found: {audioFilePath}");
+                Console.Read();
+                return;
+            }
+            FileInfo audioFileInfo = new FileInfo(audioFilePath);
+            string[] acceptedExtensions = { ".mp3", ".wav", ".flac", ".ogg", ".webm" };
+
+            if (!(acceptedExtensions.Contains(audioFileInfo.Extension)))
+            {
+                Console.Read();
+                return;
+            }
+            //
+
+            //Check for all neccesary files
             string uexpFilePath = Path.ChangeExtension(audioFilePath, ".uexp");
-
             string ubulkFilePath = Path.ChangeExtension(audioFilePath, ".ubulk");
-
             string uassetFilePath = Path.ChangeExtension(audioFilePath, ".uasset");
 
             if (!File.Exists(uexpFilePath))
@@ -100,74 +135,53 @@ namespace BencesUexpUtility
                 Console.Read();
                 return;
             }
+            //
 
-            FileInfo ubulkFileInfo = new FileInfo(ubulkFilePath);
-            byte[] original64bit = BitConverter.GetBytes(ubulkFileInfo.Length);
+            //Check for ffmpeg and wwise
+            string[] files = Directory.GetFiles("./");
+            string wwiseFile = Array.Find(files, file => Path.GetFileName(file).StartsWith("wwise")) != null ? new FileInfo(Array.Find(files, file => Path.GetFileName(file).StartsWith("wwise"))).Name : "-1";
+            string ffmpegFile = Array.Find(files, file => Path.GetFileName(file).StartsWith("ffmpeg")) != null ? new FileInfo(Array.Find(files, file => Path.GetFileName(file).StartsWith("ffmpeg"))).Name : "-1";
 
-            string wwiseFileName = "";
-
-
-            if (File.Exists("wwise.exe"))
+            if (ffmpegFile == "-1")
             {
-                wwiseFileName = "wwise.exe";
-            }
-            else if (File.Exists("wwise_pd3.exe"))
-            {
-                wwiseFileName = "wwise_pd3.exe";
-            }
-            else
-            {
-                Console.WriteLine("Wwise is not installed. You need to put wwise.exe besides the utility exe for it to work.");
+                Console.WriteLine("FFmpeg is not installed. You need to put ffmpeg.exe besides the utility exe for it to work.");
                 Console.Read();
                 return;
             }
-            Console.WriteLine("wwise is installed.");
-
-            inputFilePath = outputFilePath; string replacementFilePath = Path.ChangeExtension(audioFilePath, ".ubulk"); string wwiseArgs = $"-encode  \"{inputFilePath}\"  \"{replacementFilePath}\"";
-
-            try
+            Console.WriteLine("FFmpeg is installed.");
+            if (wwiseFile == "-1")
             {
-                ProcessStartInfo startInfo = new ProcessStartInfo
-                {
-                    FileName = wwiseFileName,
-                    Arguments = wwiseArgs,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = false
-                };
-
-                Process wwiseProcess = new Process
-                {
-                    StartInfo = startInfo
-                };
-                wwiseProcess.Start();
-
-                wwiseProcess.WaitForExit();
-
-                Console.WriteLine("Wwise encode process completed successfully.");
+                Console.WriteLine("WWise is not installed. You need to put wwise.exe besides the utility exe for it to work.");
+                Console.Read();
+                return;
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error running wwise.exe: {ex.Message}");
-            }
+            Console.WriteLine("Wwise is installed.");
+            //
 
-            FileInfo replacementFileInfo = new FileInfo(replacementFilePath);
+            //run ffmpeg and wwise
+            string replacementFilePath = Path.ChangeExtension(audioFilePath, "re.wav");
 
-            Console.WriteLine($"UBULK File Details for {ubulkFilePath}:");
-            Console.WriteLine($"Size (Bytes): {ubulkFileInfo.Length}");
+            runFFmpeg(ffmpegFile, audioFilePath, replacementFilePath);
 
-            Console.WriteLine($"Audio File Details for {replacementFilePath}:");
-            Console.WriteLine($"Size (Bytes): {replacementFileInfo.Length}");
+            runWwise(wwiseFile, replacementFilePath, Path.ChangeExtension(audioFilePath, ".ubulk"));
+            //
 
+            //Uexp editing
+            FileInfo ubulkFileInfo = new FileInfo(ubulkFilePath);
             byte[] fileBytes = File.ReadAllBytes(uexpFilePath);
 
-            byte[] replacement64bit = BitConverter.GetBytes(replacementFileInfo.Length);
-
+            byte[] replacement64bit = BitConverter.GetBytes(new FileInfo(replacementFilePath).Length);
+            byte[] original64bit = BitConverter.GetBytes(ubulkFileInfo.Length);
             byte[] original32bit = new byte[4];
             Array.Copy(original64bit, original32bit, 4);
             byte[] replacement32bit = new byte[4];
             Array.Copy(replacement64bit, replacement32bit, 4);
+
+            Console.WriteLine($"UBULK File Details for {ubulkFileInfo.Name}:");
+            Console.WriteLine($"Size (Bytes): {ubulkFileInfo.Length}");
+
+            Console.WriteLine($"Audio File Details for {new FileInfo(replacementFilePath).Name}:");
+            Console.WriteLine($"Size (Bytes): {new FileInfo(replacementFilePath).Length}");
 
             for (int i = 0; i < fileBytes.Length - original32bit.Length + 1; i++)
             {
@@ -192,21 +206,24 @@ namespace BencesUexpUtility
             }
 
             File.WriteAllBytes(uexpFilePath, fileBytes);
+            //
 
             Console.WriteLine("Replacement completed. Uexp file updated.");
 
-            string directoryPath = @".\out\";
 
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
+            string mainOutput = @".\out\";
+            string miscOutput = @".\miscOut\";
 
-            Console.WriteLine(directoryPath + new FileInfo(uexpFilePath).Name);
 
-            File.Move(uexpFilePath, directoryPath + new FileInfo(uexpFilePath).Name);
-            File.Move(ubulkFilePath, directoryPath + new FileInfo(ubulkFilePath).Name);
-            File.Move(uassetFilePath, directoryPath + new FileInfo(uassetFilePath).Name);
+            createFolder(mainOutput);
+            createFolder(miscOutput);
+
+            moveFiles(uexpFilePath, mainOutput);
+            moveFiles(ubulkFilePath, mainOutput);
+            moveFiles(uassetFilePath, mainOutput);
+            moveFiles(audioFilePath, miscOutput);
+
+            File.Delete(replacementFilePath);
 
             Console.Read();
         }
